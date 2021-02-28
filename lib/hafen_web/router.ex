@@ -24,6 +24,7 @@ defmodule HafenWeb.Router do
     pipe_through :api
 
     resources "/corpora", CorpusController, except: [:new, :edit]
+    resources "/texts", TextController, except: [:new, :edit]
   end
 
   # Enables LiveDashboard only for development

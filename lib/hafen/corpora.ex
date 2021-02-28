@@ -101,4 +101,112 @@ defmodule Hafen.Corpora do
   def change_corpus(%Corpus{} = corpus, attrs \\ %{}) do
     Corpus.changeset(corpus, attrs)
   end
+
+  alias Hafen.Corpora.Text
+
+  @doc """
+  Returns the list of texts.
+
+  ## Examples
+
+      iex> list_texts()
+      [%Text{}, ...]
+
+  """
+  def list_texts do
+    Repo.all(Text) |> Repo.preload(:corpus)
+  end
+
+  @doc """
+  Gets a single text.
+
+  Raises `Ecto.NoResultsError` if the Text does not exist.
+
+  ## Examples
+
+      iex> get_text!(123)
+      %Text{}
+
+      iex> get_text!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_text!(id) do
+    Repo.get!(Text, id) |> Repo.preload(:corpus)
+  end
+
+  @doc """
+  Creates a text.
+
+  ## Examples
+
+      iex> create_text(%{field: value})
+      {:ok, %Text{}}
+
+      iex> create_text(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_text(attrs \\ %{}) do
+    result =
+      %Text{}
+      |> Text.changeset(attrs)
+      |> Repo.insert()
+
+    with {:ok, text} <- result do
+      {:ok, Repo.preload(text, :corpus)}
+    end
+  end
+
+  @doc """
+  Updates a text.
+
+  ## Examples
+
+      iex> update_text(text, %{field: new_value})
+      {:ok, %Text{}}
+
+      iex> update_text(text, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_text(%Text{} = text, attrs) do
+    result =
+      text
+      |> Text.changeset(attrs)
+      |> Repo.update()
+
+    with {:ok, text} <- result do
+      {:ok, Repo.preload(text, :corpus)}
+    end
+  end
+
+  @doc """
+  Deletes a text.
+
+  ## Examples
+
+      iex> delete_text(text)
+      {:ok, %Text{}}
+
+      iex> delete_text(text)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_text(%Text{} = text) do
+    Repo.delete(text)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking text changes.
+
+  ## Examples
+
+      iex> change_text(text)
+      %Ecto.Changeset{data: %Text{}}
+
+  """
+  def change_text(%Text{} = text, attrs \\ %{}) do
+    Text.changeset(text, attrs)
+  end
 end
