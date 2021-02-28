@@ -117,6 +117,56 @@ defmodule Hafen.Corpora do
     Repo.all(Text) |> Repo.preload(:corpus)
   end
 
+  def list_texts(corpus_id) do
+    Text
+    |> Ecto.Query.where(corpus_id: ^corpus_id)
+    |> Repo.all()
+    |> Repo.preload(:corpus)
+  end
+
+  @doc """
+  Gets a single text.
+
+  ## Examples
+
+      iex> get_text(123)
+      %Text{}
+
+      iex> get_text(456)
+      nil
+
+  """
+  def get_text(id) do
+    case Repo.get(Text, id) |> Repo.preload(:corpus) do
+      %Text{} = text -> {:ok, text}
+      nil -> {:error, :not_found}
+    end
+  end
+
+  @doc """
+  Gets a single text for a given corpus.
+
+  ## Examples
+
+      iex> get_text(123, 1)
+      %Text{}
+
+      iex> get_text(456, 1)
+      nil
+
+  """
+  def get_text(id, corpus_id) do
+    got =
+      Text
+      |> Repo.get_by(id: id, corpus_id: corpus_id)
+      |> Repo.preload(:corpus)
+
+    case got do
+      %Text{} = text -> {:ok, text}
+      nil -> {:error, :not_found}
+    end
+  end
+
   @doc """
   Gets a single text.
 
@@ -136,6 +186,26 @@ defmodule Hafen.Corpora do
   end
 
   @doc """
+  Gets a single text for a given corpus.
+
+  Raises `Ecto.NoResultsError` if the Text does not exist.
+
+  ## Examples
+
+      iex> get_text!(123, 1)
+      %Text{}
+
+      iex> get_text!(456, 1)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_text!(id, corpus_id) do
+    Text
+    |> Repo.get_by!(id: id, corpus_id: corpus_id)
+    |> Repo.preload(:corpus)
+  end
+
+  @doc """
   Creates a text.
 
   ## Examples
@@ -148,6 +218,18 @@ defmodule Hafen.Corpora do
 
   """
   def create_text(attrs \\ %{}) do
+    result =
+      %Text{}
+      |> Text.changeset(attrs)
+      |> Repo.insert()
+
+    with {:ok, text} <- result do
+      {:ok, Repo.preload(text, :corpus)}
+    end
+  end
+
+  def create_text(attrs=%{}, corpus_id) do
+    attrs = Map.put(attrs, "corpus_id", corpus_id)
     result =
       %Text{}
       |> Text.changeset(attrs)
