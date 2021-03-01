@@ -1,5 +1,10 @@
 # Hafen
 
+Hafen is a set of tools for studying German
+
+
+## Running
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`
