@@ -1,6 +1,8 @@
 defmodule HafenWeb.Router do
   use HafenWeb, :router
 
+  use Kaffy.Routes, scope: "/admin", pipe_through: []
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
