@@ -20,9 +20,12 @@ defmodule HafenWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", HafenWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", HafenWeb do
+    pipe_through :api
+
+    resources "/corpora", CorpusController, except: [:new, :edit]
+    resources "/corpora/:corpus_id/texts", TextController, except: [:new, :edit]
+  end
 
   # Enables LiveDashboard only for development
   #
