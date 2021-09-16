@@ -106,6 +106,15 @@ defmodule Hafen.CorporaTest do
       assert Corpora.get_text!(text.id) == text
     end
 
+    test "get_random_text/0 returns a random text if one exists" do
+      text = text_fixture()
+      assert Corpora.get_random_text() == text
+    end
+
+    test "get_random_text/0 returns nil if none exists" do
+      assert Corpora.get_random_text() == nil
+    end
+
     test "create_text/1 with valid data creates a text" do
       assert {:ok, %Text{} = text} = Corpora.create_text(valid_attrs_with_corpus())
       assert text.author == "some author"

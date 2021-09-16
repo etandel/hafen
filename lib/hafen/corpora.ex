@@ -168,6 +168,33 @@ defmodule Hafen.Corpora do
   end
 
   @doc """
+  Gets a random text from the database. Returns nil if none exist.
+
+  ## Examples
+
+      iex> get_random_text()
+      %Text{}
+
+      iex> get_random_text()
+      nil
+  """
+  def get_random_text() do
+    sql = """
+    select *
+    from text tablesample bernoulli(
+        100.0 / greatest((select count(*) from text), 1)
+    )
+    limit 1
+    """
+
+    result = Ecto.Adapters.SQL.query!(Repo, sql, [])
+
+    Enum.map(result.rows, &Repo.load(Text, {result.columns, &1}))
+    |> Enum.at(0)
+    |> Repo.preload(:corpus)
+  end
+
+  @doc """
   Gets a single text.
 
   Raises `Ecto.NoResultsError` if the Text does not exist.
@@ -228,7 +255,7 @@ defmodule Hafen.Corpora do
     end
   end
 
-  def create_text(attrs = %{}, corpus_id) do
+  def create_text(%{} = attrs, corpus_id) do
     attrs = Map.put(attrs, "corpus_id", corpus_id)
 
     result =
