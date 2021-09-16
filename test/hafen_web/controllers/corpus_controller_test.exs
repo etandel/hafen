@@ -38,7 +38,7 @@ defmodule HafenWeb.CorpusControllerTest do
       assert %{
                "id" => id,
                "reference" => "some reference"
-             } = json_response(conn, 200)["data"]
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -59,7 +59,7 @@ defmodule HafenWeb.CorpusControllerTest do
       assert %{
                "id" => id,
                "reference" => "some updated reference"
-             } = json_response(conn, 200)["data"]
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, corpus: corpus} do

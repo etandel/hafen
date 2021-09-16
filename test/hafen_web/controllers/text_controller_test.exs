@@ -116,8 +116,9 @@ defmodule HafenWeb.TextControllerTest do
                "author" => "some author",
                "date" => "2010-04-17",
                "raw_text" => "some raw_text",
-               "title" => "some title"
-             } = json_response(conn, 200)["data"]
+               "title" => "some title",
+               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference},
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, corpus: corpus} do
@@ -131,8 +132,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "show 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{id: id} = text,
-      corpus: corpus
+      text: %Text{} = text,
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 
@@ -159,8 +159,9 @@ defmodule HafenWeb.TextControllerTest do
                "author" => "some updated author",
                "date" => "2011-05-18",
                "raw_text" => "some updated raw_text",
-               "title" => "some updated title"
-             } = json_response(conn, 200)["data"]
+               "title" => "some updated title",
+               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference},
+             } == json_response(conn, 200)["data"]
     end
 
     test "renders errors when data is invalid", %{conn: conn, text: text, corpus: corpus} do
@@ -170,8 +171,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "update 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{id: id} = text,
-      corpus: corpus
+      text: %Text{} = text,
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 
@@ -195,8 +195,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "delete 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{id: id} = text,
-      corpus: corpus
+      text: %Text{} = text,
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 
