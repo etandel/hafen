@@ -32,6 +32,14 @@ config :kaffy,
   ecto_repo: Hafen.Repo,
   router: HafenWeb.Router
 
+# Pow auth
+config :hafen, :pow,
+  user: Hafen.Users.User,
+  repo: Hafen.Repo,
+  extensions: [PowResetPassword, PowEmailConfirmation],
+  controller_callbacks: Pow.Extension.Phoenix.ControllerCallbacks,
+  mailer_backend: MyAppWeb.Pow.Mailer
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env()}.exs"

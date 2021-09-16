@@ -46,6 +46,7 @@ defmodule Hafen.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:kaffy, "~> 0.9.0"},
+      {:pow, "~> 1.0.24"},
 
       {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
     ]
