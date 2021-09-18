@@ -7,6 +7,5 @@ defmodule Hafen.Repo.Migrations.CreateCorpus do
 
       timestamps()
     end
-
   end
 end

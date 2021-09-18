@@ -117,7 +117,7 @@ defmodule HafenWeb.TextControllerTest do
                "date" => "2010-04-17",
                "raw_text" => "some raw_text",
                "title" => "some title",
-               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference},
+               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference}
              } == json_response(conn, 200)["data"]
     end
 
@@ -132,7 +132,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "show 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{} = text,
+      text: %Text{} = text
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 
@@ -160,7 +160,7 @@ defmodule HafenWeb.TextControllerTest do
                "date" => "2011-05-18",
                "raw_text" => "some updated raw_text",
                "title" => "some updated title",
-               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference},
+               "corpus" => %{"id" => corpus.id, "reference" => corpus.reference}
              } == json_response(conn, 200)["data"]
     end
 
@@ -171,7 +171,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "update 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{} = text,
+      text: %Text{} = text
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 
@@ -195,7 +195,7 @@ defmodule HafenWeb.TextControllerTest do
 
     test "delete 404s when text does not belong to corpus", %{
       conn: conn,
-      text: %Text{} = text,
+      text: %Text{} = text
     } do
       {:ok, wrong_corpus} = Corpora.create_corpus(%{reference: "another ref"})
 

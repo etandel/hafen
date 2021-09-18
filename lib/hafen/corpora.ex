@@ -228,8 +228,9 @@ defmodule Hafen.Corpora do
     end
   end
 
-  def create_text(attrs=%{}, corpus_id) do
+  def create_text(attrs = %{}, corpus_id) do
     attrs = Map.put(attrs, "corpus_id", corpus_id)
+
     result =
       %Text{}
       |> Text.changeset(attrs)

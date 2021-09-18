@@ -11,7 +11,6 @@ defmodule HafenWeb.CorpusView do
   end
 
   def render("corpus.json", %{corpus: corpus}) do
-    %{id: corpus.id,
-      reference: corpus.reference}
+    %{id: corpus.id, reference: corpus.reference}
   end
 end

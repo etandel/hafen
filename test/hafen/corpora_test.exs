@@ -65,8 +65,18 @@ defmodule Hafen.CorporaTest do
   describe "texts" do
     alias Hafen.Corpora.Text
 
-    @valid_attrs %{author: "some author", date: ~D[2010-04-17], raw_text: "some raw_text", title: "some title"}
-    @update_attrs %{author: "some updated author", date: ~D[2011-05-18], raw_text: "some updated raw_text", title: "some updated title"}
+    @valid_attrs %{
+      author: "some author",
+      date: ~D[2010-04-17],
+      raw_text: "some raw_text",
+      title: "some title"
+    }
+    @update_attrs %{
+      author: "some updated author",
+      date: ~D[2011-05-18],
+      raw_text: "some updated raw_text",
+      title: "some updated title"
+    }
     @invalid_attrs %{author: nil, date: nil, raw_text: nil, title: nil}
 
     def valid_attrs_with_corpus() do
