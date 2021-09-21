@@ -11,11 +11,12 @@ defmodule Hafen.Trainer do
   defstruct [:text, :sentence_index, :splitted_sentence]
 
   @type t() :: %__MODULE__{
-          text: Text.t(),
+          text: %Text{},
           sentence_index: integer(),
           splitted_sentence: list(String.t())
         }
 
+  @spec get_article_trainer(%Text{}) :: {:ok, t()} | {:error, String.t()}
   def get_article_trainer(%Text{raw_text: raw_text} = text) do
     splitted =
       raw_text
@@ -49,6 +50,7 @@ defmodule Hafen.Trainer do
     end
   end
 
+  @spec get_random_article_trainer() :: t()
   def get_random_article_trainer() do
     trainer = Corpora.get_random_text() |> get_article_trainer()
 
