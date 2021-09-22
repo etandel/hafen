@@ -1,0 +1,9 @@
+<p> 
+  <%= for chunk <- Enum.slice(@splitted_sentence, 0..-2)  do %>
+    <%= chunk %>
+    <input style="width: 3em;"></input>
+
+  <% end %>
+
+    <%= Enum.at(@splitted_sentence, -1) %>
+</p>
