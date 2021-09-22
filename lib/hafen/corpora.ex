@@ -181,9 +181,8 @@ defmodule Hafen.Corpora do
   def get_random_text() do
     sql = """
     select *
-    from text tablesample bernoulli(
-        100.0 / greatest((select count(*) from text), 1)
-    )
+    from text
+    order by random()
     limit 1
     """
 
