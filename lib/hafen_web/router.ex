@@ -19,6 +19,8 @@ defmodule HafenWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+
+    get "/trainer/article", TrainerController, :article_question
   end
 
   # Other scopes may use custom stacks.
