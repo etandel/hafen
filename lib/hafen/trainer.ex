@@ -16,7 +16,7 @@ defmodule Hafen.Trainer do
           splitted_sentence: list(String.t())
         }
 
-  @spec get_article_trainer(%Text{}) :: {:ok, t()} | {:error, String.t()}
+  @spec get_article_trainer(%Text{}) :: {:ok, t} | {:error, String.t()}
   def get_article_trainer(%Text{raw_text: raw_text} = text) do
     splitted =
       raw_text
@@ -50,16 +50,58 @@ defmodule Hafen.Trainer do
     end
   end
 
-  @spec get_random_article_trainer() :: t()
-  def get_random_article_trainer() do
+  @spec get_article_trainer(%Text{}, integer()) :: {:error, String.t()} | {:ok, t}
+  def get_article_trainer(%Text{raw_text: raw_text} = text, sentence_index) do
+    sentence =
+      raw_text
+      |> String.split(".")
+      |> Enum.at(sentence_index)
+
+    case sentence do
+      nil ->
+        {:error, "Invalid index #{sentence_index}"}
+
+      _ ->
+        splitted_sentence = Article.split_on_articles(sentence)
+
+        {:ok,
+         %__MODULE__{
+           text: text,
+           splitted_sentence: splitted_sentence,
+           sentence_index: sentence_index
+         }}
+    end
+  end
+
+  @spec get_article_trainer() :: t
+  def get_article_trainer() do
     trainer = Corpora.get_random_text() |> get_article_trainer()
 
     case trainer do
       {:error, _} ->
-        get_random_article_trainer()
+        get_article_trainer()
 
       {:ok, trainer} ->
         trainer
     end
+  end
+
+  @spec merge_text_with_answers(list(String.t()), list(String.t())) :: String.t()
+  def merge_text_with_answers(splitted_text, answers) do
+    Stream.zip(splitted_text, answers)
+    |> Stream.concat([{Enum.at(splitted_text, -1), ""}])
+    |> Enum.map_join("", &(&1 |> Tuple.to_list() |> Enum.join()))
+  end
+
+  def correct?(%__MODULE__{} = trainer, answers) do
+    got = merge_text_with_answers(trainer.splitted_sentence, answers) |> String.downcase()
+
+    expected =
+      trainer.text.raw_text
+      |> String.split(".")
+      |> Enum.at(trainer.sentence_index)
+      |> String.downcase()
+
+    got == expected
   end
 end

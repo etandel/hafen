@@ -1,0 +1,21 @@
+<p> 
+
+<%= form_for @conn, Routes.trainer_path(@conn, :article_answer), [as: :answers], fn f -> %>
+
+  <%= for {chunk, idx} <- Enum.slice(@splitted_sentence, 0..-2) |> Enum.with_index()  do %>
+    <%= chunk %>
+    <%#= text_input f, style: "width: 3em;" %>
+    <%= text_input f, "#{idx}", style: "width: 3em;" %>
+  <% end %>
+
+  <%= Enum.at(@splitted_sentence, -1) %>
+<% end %>
+</p>
+
+<div>
+  <p> Correct: <%= @correct %> </p>
+</div>
+
+<div>
+  <p> Original: <%= @raw_text %> </p>
+</div>
