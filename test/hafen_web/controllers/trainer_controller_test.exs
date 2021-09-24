@@ -4,8 +4,6 @@ defmodule HafenWeb.TrainerControllerTest do
   alias Hafen.Corpora
   alias Hafen.Trainer
 
-  import Phoenix.View
-
   @sentence_with_article "Das this sentence der contains articles at start, middle and end die"
 
   def fixture(:trainer) do
@@ -17,18 +15,9 @@ defmodule HafenWeb.TrainerControllerTest do
 
   describe "article_question" do
     test "renders trainer's splitted questions", %{conn: conn} do
-      trainer = fixture(:trainer)
-
+      fixture(:trainer)
       conn = get(conn, Routes.trainer_path(conn, :article_question))
-
-      got = html_response(conn, 200)
-
-      expected =
-        render_to_string(HafenWeb.TrainerView, "question.html",
-          splitted_sentence: trainer.splitted_sentence
-        )
-
-      assert got =~ expected
+      assert Phoenix.Controller.view_template(conn) == "question.html"
     end
   end
 end

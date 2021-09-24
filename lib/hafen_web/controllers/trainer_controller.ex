@@ -5,10 +5,16 @@ defmodule HafenWeb.TrainerController do
   require Logger
 
   def article_question(conn, _params) do
-    trainer = Trainer.get_random_article_trainer()
+    trainer = Trainer.get_article_trainer()
 
     Logger.debug(trainer)
 
-    render(conn, "question.html", splitted_sentence: trainer.splitted_sentence)
+    render(conn, "question.html", splitted_sentence: trainer.splitted_sentence, conn: conn)
+  end
+
+  def article_answer(conn, params) do
+    answers = params["answers"]
+    Logger.debug(answers)
+    conn
   end
 end

@@ -1,9 +1,17 @@
 <p> 
-  <%= for chunk <- Enum.slice(@splitted_sentence, 0..-2)  do %>
-    <%= chunk %>
-    <input style="width: 3em;"></input>
 
+<%= form_for @conn, Routes.trainer_path(@conn, :article_answer), [as: :answers], fn f -> %>
+
+  <%= for {chunk, idx} <- Enum.slice(@splitted_sentence, 0..-2) |> Enum.with_index()  do %>
+    <%= chunk %>
+    <%#= text_input f, style: "width: 3em;" %>
+    <%= text_input f, "#{idx}", style: "width: 3em;" %>
   <% end %>
 
-    <%= Enum.at(@splitted_sentence, -1) %>
+  <%= Enum.at(@splitted_sentence, -1) %>
+
+  <%= submit "Check" %>
+<% end %>
+
+
 </p>
