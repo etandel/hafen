@@ -2,53 +2,79 @@ defmodule Hafen.TrainerText do
   use Hafen.DataCase
 
   alias Hafen.Article
+  alias Hafen.Corpora.Sentence
   alias Hafen.Corpora.Text
   alias Hafen.Trainer
 
-  defp make_expected(expected_text, expected_splitted, expected_index \\ 0) do
-    %Trainer{
-      text: expected_text,
-      splitted_sentence: expected_splitted,
-      sentence_index: expected_index
-    }
+  defp make_sentence(value) do
+    t = %Text{raw_text: value}
+    %Sentence{id: 0, text: t, value: value}
   end
 
-  describe "get_article_trainer/1" do
-    defp assert_ok(raw_text, expected_splitted, expected_index \\ 0) do
-      t = %Text{raw_text: raw_text}
+  defp make_expected(sentence, expected_splitted) do
+    %Trainer{sentence: sentence, splitted_sentence: expected_splitted}
+  end
 
-      expected = make_expected(t, expected_splitted, expected_index)
-      assert Trainer.get_article_trainer(t) == {:ok, expected}
+  describe "new/1" do
+    defp assert_new_ok(raw_sentence, expected_splitted) do
+      s = make_sentence(raw_sentence)
+      expected = make_expected(s, expected_splitted)
+      assert Trainer.new(s) == {:ok, expected}
     end
 
-    test "with empty string error" do
-      t = %Text{raw_text: ""}
-      assert {:error, _} = Trainer.get_article_trainer(t)
+    defp assert_new_error(raw_sentence) do
+      s = make_sentence(raw_sentence)
+      {ok?, _} = Trainer.new(s)
+      assert ok? == :error
+    end
+
+    test "with empty sentences returns error" do
+      assert_new_error("")
+      assert_new_error(".")
+      assert_new_error("?")
     end
 
     test "with only articles returns error" do
-      t = %Text{raw_text: "die"}
-      assert {:error, _} = Trainer.get_article_trainer(t)
-
-      t = %Text{raw_text: "die der"}
-      assert {:error, _} = Trainer.get_article_trainer(t)
-
-      t = %Text{raw_text: "die der das"}
-      assert {:error, _} = Trainer.get_article_trainer(t)
+      assert_new_error("die")
+      assert_new_error("die der")
+      assert_new_error("die der das")
     end
 
     test "with sentence with no articles returns error" do
+      assert_new_error("ich liebe dich")
+      assert_new_error("ich liebe dich.")
+    end
+
+    test "with sentence with article and one word returns ok" do
+      assert_new_ok("die frau.", ["", " frau."])
+      assert_new_ok("frau die.", ["frau ", "."])
+    end
+
+    test "with sentence with multiple articles returns ok" do
+      assert_new_ok("die frau der.", ["", " frau ", "."])
+    end
+  end
+
+  describe "get_article_trainer/1" do
+    defp assert_get_article_trainer_ok(raw_text, expected_splitted, expected_sentence_id \\ 0) do
+      t = %Text{raw_text: raw_text}
+
+      expected =
+        t
+        |> Sentence.split()
+        |> Enum.at(expected_sentence_id)
+        |> make_expected(expected_splitted)
+
+      assert Trainer.get_article_trainer(t) == {:ok, expected}
+    end
+
+    test "with one bad sentence returns error" do
       t = %Text{raw_text: "ich liebe dich"}
       assert {:error, _} = Trainer.get_article_trainer(t)
     end
 
-    test "with sentence with article and one word returns ok" do
-      assert_ok("die frau", ["", " frau"])
-      assert_ok("frau die", ["frau ", ""])
-    end
-
-    test "with sentence with multiple articles returns ok" do
-      assert_ok("die frau der", ["", " frau ", ""])
+    test "with one good sentence returns ok" do
+      assert_get_article_trainer_ok("die frau", ["", " frau"])
     end
 
     test "with only bad sentences returns error" do
@@ -57,29 +83,20 @@ defmodule Hafen.TrainerText do
     end
 
     test "with 1 bad and 1 good sentence returns ok" do
-      assert_ok("die. die frau", [" ", " frau"], 1)
-      assert_ok("die frau. die.", ["", " frau"], 0)
+      assert_get_article_trainer_ok("die. die frau", ["", " frau"], 1)
+      assert_get_article_trainer_ok("die frau. die.", ["", " frau."], 0)
     end
 
     test "with 2 good sentences returns ok" do
       t = %Text{raw_text: "die frau. der man."}
+
+      expected_options =
+        Sentence.split(t)
+        |> Enum.zip([["", " frau."], ["", " man."]])
+        |> Enum.map(fn {s, splitted} -> %Trainer{sentence: s, splitted_sentence: splitted} end)
+
       {:ok, got} = Trainer.get_article_trainer(t)
-      assert got in [make_expected(t, ["", " frau"], 0), make_expected(t, [" ", " man"], 1)]
-    end
-  end
-
-  describe "get_article_trainer/2" do
-    test "ok" do
-      t = %Text{raw_text: "der foo. das bar."}
-
-      assert {:ok, got} = Trainer.get_article_trainer(t, 0)
-      assert got == %Trainer{text: t, sentence_index: 0, splitted_sentence: ["", " foo"]}
-
-      assert {:ok, got} = Trainer.get_article_trainer(t, 1)
-      assert got == %Trainer{text: t, sentence_index: 1, splitted_sentence: [" ", " bar"]}
-
-      assert {:error, _} = Trainer.get_article_trainer(t, 3)
-      assert {:error, _} = Trainer.get_article_trainer(t, -10)
+      assert got in expected_options
     end
   end
 
@@ -89,8 +106,8 @@ defmodule Hafen.TrainerText do
     test "gets random text" do
       {:ok, corpus} = Corpora.create_corpus(%{reference: "x"})
       {:ok, t} = Corpora.create_text(%{raw_text: "die frau.", corpus_id: corpus.id})
-
-      assert Trainer.get_article_trainer() == make_expected(t, ["", " frau"])
+      s = %Sentence{} = Sentence.split(t) |> Enum.at(0)
+      assert Trainer.get_article_trainer() == make_expected(s, ["", " frau."])
     end
 
     test "retries until a trainer is generated" do
@@ -98,7 +115,8 @@ defmodule Hafen.TrainerText do
       {:ok, _bad_t} = Corpora.create_text(%{raw_text: ".", corpus_id: corpus.id})
       {:ok, t} = Corpora.create_text(%{raw_text: "die frau.", corpus_id: corpus.id})
 
-      assert Trainer.get_article_trainer() == make_expected(t, ["", " frau"])
+      s = %Sentence{} = Sentence.split(t) |> Enum.at(0)
+      assert Trainer.get_article_trainer() == make_expected(s, ["", " frau."])
     end
   end
 
@@ -119,9 +137,8 @@ defmodule Hafen.TrainerText do
   describe "correct?" do
     test "with only one sentence" do
       trainer = %Trainer{
-        text: %Text{raw_text: "der foo"},
-        splitted_sentence: ["", " foo"],
-        sentence_index: 0
+        sentence: make_sentence("der foo"),
+        splitted_sentence: ["", " foo"]
       }
 
       assert Trainer.correct?(trainer, ["der"])
@@ -129,20 +146,6 @@ defmodule Hafen.TrainerText do
       assert Trainer.correct?(trainer, ["DER"])
 
       assert not Trainer.correct?(trainer, ["das"])
-    end
-
-    test "with only two sentences" do
-      trainer = %Trainer{
-        text: %Text{raw_text: "der foo. das bar"},
-        splitted_sentence: [" ", " bar"],
-        sentence_index: 1
-      }
-
-      assert Trainer.correct?(trainer, ["das"])
-      assert Trainer.correct?(trainer, ["Das"])
-      assert Trainer.correct?(trainer, ["DAS"])
-
-      assert not Trainer.correct?(trainer, ["der"])
     end
   end
 end

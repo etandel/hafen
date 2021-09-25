@@ -5,8 +5,9 @@ defmodule Hafen.Corpora do
 
   import Ecto.Query, warn: false
   alias Hafen.Repo
-
   alias Hafen.Corpora.Corpus
+  alias Hafen.Corpora.Sentence
+  alias Hafen.Corpora.Text
 
   @doc """
   Returns the list of corpora.
@@ -101,8 +102,6 @@ defmodule Hafen.Corpora do
   def change_corpus(%Corpus{} = corpus, attrs \\ %{}) do
     Corpus.changeset(corpus, attrs)
   end
-
-  alias Hafen.Corpora.Text
 
   @doc """
   Returns the list of texts.
@@ -317,5 +316,32 @@ defmodule Hafen.Corpora do
   """
   def change_text(%Text{} = text, attrs \\ %{}) do
     Text.changeset(text, attrs)
+  end
+
+  @doc """
+  Gets a Sentence for a given Text.
+
+  Raises `Ecto.NoResultsError` if the Text or Sentence does not exist.
+
+  ## Examples
+
+      iex> get_sentence(123, 1)
+      %Text{}
+
+      iex> get_sentence(456, 1)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_sentence!(id, text_id) do
+    sentence =
+      Text
+      |> Repo.get_by!(id: text_id)
+      |> Repo.preload(:corpus)
+      |> Sentence.split()
+      |> Enum.at(id)
+
+    with nil <- sentence do
+      raise Ecto.NoResultsError, message: "Sentence #{id} does not exist for Text #{text_id}"
+    end
   end
 end

@@ -28,5 +28,10 @@ defmodule Hafen.ArticleText do
         assert Article.split_on_articles(article) == ["", ""]
       end
     end
+
+    test "split_on_articles/1 with article preceding punctuation should split correctly" do
+      s = "foo den."
+      assert Article.split_on_articles(s) == ["foo ", "."]
+    end
   end
 end

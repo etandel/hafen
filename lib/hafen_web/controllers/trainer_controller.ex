@@ -27,11 +27,13 @@ defmodule HafenWeb.TrainerController do
   end
 
   def article_answer(conn, %{
-        "answers" => %{"text_id" => text_id, "sentence_index" => sentence_id} = raw_answers
+        "answers" => %{"text_id" => text_id, "sentence_id" => sentence_id} = raw_answers
       }) do
     answers = get_answer_list(raw_answers)
-    text = %Corpora.Text{} = Corpora.get_text!(String.to_integer(text_id))
-    {:ok, trainer} = Trainer.get_article_trainer(text, String.to_integer(sentence_id))
+
+    {:ok, trainer} =
+      Corpora.get_sentence!(String.to_integer(sentence_id), String.to_integer(text_id))
+      |> Trainer.new()
 
     correct = Trainer.correct?(trainer, answers)
 

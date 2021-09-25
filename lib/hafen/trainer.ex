@@ -5,71 +5,54 @@ defmodule Hafen.Trainer do
 
   alias Hafen.Corpora
   alias Hafen.Corpora.Text
+  alias Hafen.Corpora.Sentence
   alias Hafen.Article
 
-  @enforce_keys [:text, :sentence_index, :splitted_sentence]
-  defstruct [:text, :sentence_index, :splitted_sentence]
+  @enforce_keys [:sentence, :splitted_sentence]
+  defstruct [:sentence, :splitted_sentence]
 
   @type t() :: %__MODULE__{
-          text: %Text{},
-          sentence_index: integer(),
+          sentence: %Sentence{},
           splitted_sentence: list(String.t())
         }
 
-  @spec get_article_trainer(%Text{}) :: {:ok, t} | {:error, String.t()}
-  def get_article_trainer(%Text{raw_text: raw_text} = text) do
-    splitted =
-      raw_text
-      |> String.split(".")
-      |> Stream.with_index()
-      |> Enum.shuffle()
-      |> Stream.map(fn {sentence, idx} ->
-        splitted = Article.split_on_articles(sentence)
+  defp valid?(splitted) do
+    validators = [
+      fn sp -> length(sp) > 1 end,
+      fn sp ->
+        not (sp
+             |> Stream.map(&String.trim/1)
+             |> Enum.all?(fn part -> part == "" or Sentence.punctuation_only?(part) end))
+      end
+    ]
 
-        if length(splitted) == 1 or Enum.all?(splitted, &(String.trim(&1) == "")) do
-          nil
-        else
-          {splitted, idx}
-        end
-      end)
-      |> Stream.filter(&(&1 != nil))
-      |> Enum.at(0)
+    validators |> Enum.all?(fn v -> v.(splitted) end)
+  end
 
-    case splitted do
-      nil ->
-        {:error, "Cannot get trainer for text"}
+  @spec new(%Sentence{}) :: {:error, String.t()} | {:ok, t}
+  def new(%Sentence{value: raw_sentence} = sentence) do
+    splitted = Article.split_on_articles(raw_sentence)
 
-      {splitted_sentence, idx} ->
-        tr = %__MODULE__{
-          text: text,
-          sentence_index: idx,
-          splitted_sentence: splitted_sentence
-        }
-
-        {:ok, tr}
+    if valid?(splitted) do
+      {:ok, %__MODULE__{sentence: sentence, splitted_sentence: splitted}}
+    else
+      {:error, "Could not get article trainer from sentence #{sentence.text.id}_#{sentence.id}"}
     end
   end
 
-  @spec get_article_trainer(%Text{}, integer()) :: {:error, String.t()} | {:ok, t}
-  def get_article_trainer(%Text{raw_text: raw_text} = text, sentence_index) do
-    sentence =
-      raw_text
-      |> String.split(".")
-      |> Enum.at(sentence_index)
+  @spec get_article_trainer(%Text{}) :: {:ok, t} | {:error, String.t()}
+  def get_article_trainer(%Text{} = text) do
+    trainer =
+      text
+      |> Sentence.split()
+      |> Enum.shuffle()
+      |> Stream.map(&new/1)
+      |> Stream.filter(fn {ok, _} -> ok == :ok end)
+      |> Enum.at(0)
 
-    case sentence do
-      nil ->
-        {:error, "Invalid index #{sentence_index}"}
-
-      _ ->
-        splitted_sentence = Article.split_on_articles(sentence)
-
-        {:ok,
-         %__MODULE__{
-           text: text,
-           splitted_sentence: splitted_sentence,
-           sentence_index: sentence_index
-         }}
+    case trainer do
+      nil -> {:error, "Cannot get trainer for text"}
+      trainer -> trainer
     end
   end
 
@@ -95,13 +78,7 @@ defmodule Hafen.Trainer do
 
   def correct?(%__MODULE__{} = trainer, answers) do
     got = merge_text_with_answers(trainer.splitted_sentence, answers) |> String.downcase()
-
-    expected =
-      trainer.text.raw_text
-      |> String.split(".")
-      |> Enum.at(trainer.sentence_index)
-      |> String.downcase()
-
+    expected = trainer.sentence.value |> String.downcase()
     got == expected
   end
 end
