@@ -30,5 +30,5 @@ migrate-db:
 run: start-db create-db migrate-db
 	mix phx.server
 
-deploy:
+deploy: check-all
 	git push gigalixir HEAD:main
