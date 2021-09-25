@@ -1,4 +1,6 @@
 defmodule Hafen.Corpora.Text do
+  @moduledoc "Text entity"
+
   use Ecto.Schema
   import Ecto.Changeset
 

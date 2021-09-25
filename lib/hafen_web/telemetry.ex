@@ -1,4 +1,6 @@
 defmodule HafenWeb.Telemetry do
+  @moduledoc "Generated telemetry stuff"
+
   use Supervisor
   import Telemetry.Metrics
 

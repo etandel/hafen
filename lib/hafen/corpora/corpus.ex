@@ -1,4 +1,6 @@
 defmodule Hafen.Corpora.Corpus do
+  @moduledoc "Corpus entity"
+
   use Ecto.Schema
   import Ecto.Changeset
 
