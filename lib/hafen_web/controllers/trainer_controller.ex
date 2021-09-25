@@ -10,11 +10,10 @@ defmodule HafenWeb.TrainerController do
 
     Logger.debug(trainer)
 
-    render(conn, "question.html",
-      text_id: trainer.text.id,
-      sentence_index: trainer.sentence_index,
-      splitted_sentence: trainer.splitted_sentence,
-      conn: conn
+    render(conn, "article.html",
+      conn: conn,
+      trainer: trainer,
+      state: :question
     )
   end
 
@@ -35,17 +34,18 @@ defmodule HafenWeb.TrainerController do
     {:ok, trainer} = Trainer.get_article_trainer(text, String.to_integer(sentence_id))
 
     correct = Trainer.correct?(trainer, answers)
-    conn = case correct do
-      true -> put_flash(conn, :info, "Congrats!")
-      false -> put_flash(conn, :error, "Oops")
-    end
 
-    render(conn, "answer.html",
-      splitted_sentence: trainer.splitted_sentence,
+    conn =
+      case correct do
+        true -> put_flash(conn, :info, "Correct!")
+        false -> put_flash(conn, :error, "Sorry, wrong answer.")
+      end
+
+    render(conn, "article.html",
       conn: conn,
-      correct: correct,
-      answers: raw_answers,
-      raw_text: trainer.text.raw_text
+      trainer: trainer,
+      state: :answer,
+      correct: correct
     )
   end
 end

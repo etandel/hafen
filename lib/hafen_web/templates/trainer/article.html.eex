@@ -1,0 +1,31 @@
+<h3> Your answer: </h3>
+<p>
+  <%= form_for @conn, Routes.trainer_path(@conn, :article_answer), [as: :answers], fn f -> %>
+    <%= text_input f, "text_id", value: @trainer.text.id, type: "hidden" %>
+    <%= text_input f, "sentence_index", value: @trainer.sentence_index, type: "hidden" %>
+
+    <%= for {chunk, idx} <- Enum.slice(@trainer.splitted_sentence, 0..-2) |> Enum.with_index()  do %>
+      <%= chunk %>
+      <%= if @state == :question do %>
+        <%= text_input f, "answer_#{idx}", style: "width: 4em; text-align: center", required: "", maxlenght: 3, minlength: 3 %>
+      <% else %>
+        <%= text_input f, "answer_#{idx}", style: "width: 4em; text-align: center", disabled: "" %>
+      <% end %>
+
+    <% end %>
+
+    <%= Enum.at(@trainer.splitted_sentence, -1) %>
+
+    <%= if @state == :question do %>
+      <%= submit "Check" %>
+    <% end %>
+
+  <% end %>
+</p>
+
+<div>
+    <%= if @state == :answer do %>
+      <div> <h3> Original: </h3> <p> <%= @trainer.text.raw_text %> </p> </div>
+    <% end %>
+  <div> <h3> Reference: </h3> <p> <%= @trainer.text.corpus.reference %> </p> </div>
+</div>

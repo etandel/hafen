@@ -17,7 +17,7 @@ defmodule HafenWeb.TrainerControllerTest do
     test "renders trainer's splitted questions", %{conn: conn} do
       fixture(:trainer)
       conn = get(conn, Routes.trainer_path(conn, :article_question))
-      assert Phoenix.Controller.view_template(conn) == "question.html"
+      assert Phoenix.Controller.view_template(conn) == "article.html"
     end
   end
 end
