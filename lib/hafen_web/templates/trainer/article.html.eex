@@ -1,4 +1,10 @@
-<h3> Your answer: </h3>
+<section class="phx-hero">
+  <h1><%= gettext "Article Trainer" %></h1>
+</section>
+
+<section>
+  <h3> Your answer: </h3>
+
   <%= form_for @conn, Routes.trainer_path(@conn, :article_answer), [as: :answers], fn f -> %>
     <%= text_input f, "text_id", value: @trainer.sentence.text.id, type: "hidden" %>
     <%= text_input f, "sentence_id", value: @trainer.sentence.id, type: "hidden" %>
@@ -22,16 +28,16 @@
     <% end %>
 
   <% end %>
+</section>
 
-<div>
+<section>
     <%= if @state == :answer do %>
-      <div> <h3> Original: </h3> <p> <%= @trainer.sentence.value %> </p> </div>
+      <article> <h3> Original: </h3> <p> <%= @trainer.sentence.value %> </p> </article>
     <% end %>
-  <div> <h3> Reference: </h3> <p> <%= @trainer.sentence.text.corpus.reference %> </p> </div>
-</div>
+  <article> <h3> Reference: </h3> <p> <%= @trainer.sentence.text.corpus.reference %> </p> </article>
+</section>
 
 
 <div>
   <%= link "Try another", to: Routes.trainer_path(@conn, :article_question), class: "button" %>
-
 </div>
