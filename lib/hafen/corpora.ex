@@ -332,6 +332,7 @@ defmodule Hafen.Corpora do
       ** (Ecto.NoResultsError)
 
   """
+  @spec get_sentence!(integer(), integer()) :: %Sentence{}
   def get_sentence!(id, text_id) do
     sentence =
       Text
@@ -341,7 +342,9 @@ defmodule Hafen.Corpora do
       |> Enum.at(id)
 
     with nil <- sentence do
-      raise Ecto.NoResultsError, message: "Sentence #{id} does not exist for Text #{text_id}"
+      raise Ecto.NoResultsError,
+        message: "Sentence #{id} does not exist for Text #{text_id}",
+        queryable: "sentence"
     end
   end
 end

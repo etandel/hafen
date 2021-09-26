@@ -2,10 +2,11 @@ defmodule Hafen.CorporaTest do
   use Hafen.DataCase
 
   alias Hafen.Corpora
+  alias Hafen.Corpora.Corpus
+  alias Hafen.Corpora.Sentence
+  alias Hafen.Corpora.Text
 
   describe "corpora" do
-    alias Hafen.Corpora.Corpus
-
     @valid_attrs %{reference: "some reference"}
     @update_attrs %{reference: "some updated reference"}
     @invalid_attrs %{reference: nil}
@@ -63,8 +64,6 @@ defmodule Hafen.CorporaTest do
   end
 
   describe "texts" do
-    alias Hafen.Corpora.Text
-
     @valid_attrs %{
       author: "some author",
       date: ~D[2010-04-17],
@@ -151,6 +150,27 @@ defmodule Hafen.CorporaTest do
     test "change_text/1 returns a text changeset" do
       text = text_fixture()
       assert %Ecto.Changeset{} = Corpora.change_text(text)
+    end
+  end
+
+  describe "sentence" do
+    test "get_sentence/2 with invalid ids raises error" do
+      text = text_fixture()
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Corpora.get_sentence!(999, text.id)
+      end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Corpora.get_sentence!(0, 999)
+      end
+    end
+
+    test "get_sentence/2 with correct ids return sentence" do
+      text = text_fixture()
+      expected = %Sentence{} = Sentence.split(text) |> Enum.at(0)
+      got = Corpora.get_sentence!(0, text.id)
+      assert got == expected
     end
   end
 end
