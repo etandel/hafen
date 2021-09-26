@@ -7,10 +7,10 @@ defmodule Hafen.Corpora.Text do
   alias Hafen.Corpora.Corpus
 
   schema "text" do
-    field :author, :string
+    field :author, :string, default: ""
     field :date, :date
     field :raw_text, :string
-    field :title, :string
+    field :title, :string, default: ""
 
     belongs_to :corpus, Corpus
 

@@ -5,8 +5,9 @@ defmodule Hafen.Corpora do
 
   import Ecto.Query, warn: false
   alias Hafen.Repo
-
   alias Hafen.Corpora.Corpus
+  alias Hafen.Corpora.Sentence
+  alias Hafen.Corpora.Text
 
   @doc """
   Returns the list of corpora.
@@ -102,8 +103,6 @@ defmodule Hafen.Corpora do
     Corpus.changeset(corpus, attrs)
   end
 
-  alias Hafen.Corpora.Text
-
   @doc """
   Returns the list of texts.
 
@@ -168,6 +167,32 @@ defmodule Hafen.Corpora do
   end
 
   @doc """
+  Gets a random text from the database. Returns nil if none exist.
+
+  ## Examples
+
+      iex> get_random_text()
+      %Text{}
+
+      iex> get_random_text()
+      nil
+  """
+  def get_random_text() do
+    sql = """
+    select *
+    from text
+    order by random()
+    limit 1
+    """
+
+    result = Ecto.Adapters.SQL.query!(Repo, sql, [])
+
+    Enum.map(result.rows, &Repo.load(Text, {result.columns, &1}))
+    |> Enum.at(0)
+    |> Repo.preload(:corpus)
+  end
+
+  @doc """
   Gets a single text.
 
   Raises `Ecto.NoResultsError` if the Text does not exist.
@@ -228,7 +253,7 @@ defmodule Hafen.Corpora do
     end
   end
 
-  def create_text(attrs = %{}, corpus_id) do
+  def create_text(%{} = attrs, corpus_id) do
     attrs = Map.put(attrs, "corpus_id", corpus_id)
 
     result =
@@ -291,5 +316,35 @@ defmodule Hafen.Corpora do
   """
   def change_text(%Text{} = text, attrs \\ %{}) do
     Text.changeset(text, attrs)
+  end
+
+  @doc """
+  Gets a Sentence for a given Text.
+
+  Raises `Ecto.NoResultsError` if the Text or Sentence does not exist.
+
+  ## Examples
+
+      iex> get_sentence(123, 1)
+      %Text{}
+
+      iex> get_sentence(456, 1)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_sentence!(integer(), integer()) :: %Sentence{}
+  def get_sentence!(id, text_id) do
+    sentence =
+      Text
+      |> Repo.get_by!(id: text_id)
+      |> Repo.preload(:corpus)
+      |> Sentence.split()
+      |> Enum.at(id)
+
+    with nil <- sentence do
+      raise Ecto.NoResultsError,
+        message: "Sentence #{id} does not exist for Text #{text_id}",
+        queryable: "sentence"
+    end
   end
 end
