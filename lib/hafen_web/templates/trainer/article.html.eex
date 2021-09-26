@@ -29,3 +29,9 @@
     <% end %>
   <div> <h3> Reference: </h3> <p> <%= @trainer.sentence.text.corpus.reference %> </p> </div>
 </div>
+
+
+<div>
+  <%= link "Try another", to: Routes.trainer_path(@conn, :article_question), class: "button" %>
+
+</div>
